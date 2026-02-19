@@ -1,14 +1,14 @@
 """
-XenForo Forum Archiver - Categorizer Testleri
+XenForo Forum Archiver - Categorizer Tests
 
-Bu dosya ContentCategorizer sınıfının test senaryolarını içerir.
+This file contains test scenarios for the ContentCategorizer class.
 """
 
 import unittest
 from pathlib import Path
 import sys
 
-# Proje kök dizinini path'e ekle
+# Add project root directory to path
 project_root = Path(__file__).parent.parent
 sys.path.insert(0, str(project_root))
 
@@ -17,19 +17,19 @@ import config
 
 
 class TestContentCategorizer(unittest.TestCase):
-    """ContentCategorizer sınıfı için test senaryoları"""
+    """Test scenarios for ContentCategorizer class"""
     
     def setUp(self):
-        """Her testten önce çalışır"""
+        """Run before each test"""
         self.categorizer = ContentCategorizer()
         
-        # Test verisi
+        # Test data
         self.sample_posts = [
             {
                 'post_id': '1',
                 'author': 'Test User 1',
-                'content_text': 'Bu bir inceleme yazısıdır. Test edildi ve analiz yapıldı.',
-                'content_html': '<p>Bu bir inceleme yazısıdır. Test edildi ve analiz yapıldı.</p>',
+                'content_text': 'This is a review post. It was tested and analyzed.',
+                'content_html': '<p>This is a review post. It was tested and analyzed.</p>',
                 'images': [],
                 'videos': [],
                 'attachments': []
@@ -37,8 +37,8 @@ class TestContentCategorizer(unittest.TestCase):
             {
                 'post_id': '2',
                 'author': 'Test User 2',
-                'content_text': 'Nasıl kurulum yapılır? Adım adım rehber.',
-                'content_html': '<p>Nasıl kurulum yapılır? Adım adım rehber.</p>',
+                'content_text': 'How to install? Step by step guide.',
+                'content_html': '<p>How to install? Step by step guide.</p>',
                 'images': [],
                 'videos': [],
                 'attachments': []
@@ -46,8 +46,8 @@ class TestContentCategorizer(unittest.TestCase):
             {
                 'post_id': '3',
                 'author': 'Test User 3',
-                'content_text': 'Yeni güncelleme duyurusu! Harika bir haber.',
-                'content_html': '<p>Yeni güncelleme duyurusu! Harika bir haber.</p>',
+                'content_text': 'New update announcement! Great news.',
+                'content_html': '<p>New update announcement! Great news.</p>',
                 'images': [],
                 'videos': [],
                 'attachments': []
@@ -55,8 +55,8 @@ class TestContentCategorizer(unittest.TestCase):
             {
                 'post_id': '4',
                 'author': 'Test User 4',
-                'content_text': 'Bu konuda tartışma başlatmak istiyorum. Soru sormak ve yardım almak için.',
-                'content_html': '<p>Bu konuda tartışma başlatmak istiyorum. Soru sormak ve yardım almak için.</p>',
+                'content_text': 'I want to start a discussion on this topic. To ask questions and get help.',
+                'content_html': '<p>I want to start a discussion on this topic. To ask questions and get help.</p>',
                 'images': [],
                 'videos': [],
                 'attachments': []
@@ -64,8 +64,8 @@ class TestContentCategorizer(unittest.TestCase):
             {
                 'post_id': '5',
                 'author': 'Test User 5',
-                'content_text': 'Video paylaşımı.',
-                'content_html': '<p>Video paylaşımı.</p>',
+                'content_text': 'Video sharing.',
+                'content_html': '<p>Video sharing.</p>',
                 'images': [],
                 'videos': [{'type': 'youtube', 'src': 'https://youtube.com/watch?v=test'}],
                 'attachments': []
@@ -73,97 +73,97 @@ class TestContentCategorizer(unittest.TestCase):
             {
                 'post_id': '6',
                 'author': 'Test User 6',
-                'content_text': 'Sadece bir paylaşım.',
-                'content_html': '<p>Sadece bir paylaşım.</p>',
+                'content_text': 'Just a post.',
+                'content_html': '<p>Just a post.</p>',
                 'images': [],
                 'videos': [],
                 'attachments': []
             }
         ]
     
-    def test_categorize_post_inceleme(self):
-        """İnceleme kategorisi testi"""
+    def test_categorize_post_review(self):
+        """Review category test"""
         post = self.sample_posts[0]
         category = self.categorizer.categorize_post(post)
-        self.assertEqual(category, 'inceleme')
+        self.assertEqual(category, 'review')
         self.assertIn('category', post)
         self.assertIn('content_type', post)
     
-    def test_categorize_post_rehber(self):
-        """Rehber kategorisi testi"""
+    def test_categorize_post_guide(self):
+        """Guide category test"""
         post = self.sample_posts[1]
         category = self.categorizer.categorize_post(post)
-        self.assertEqual(category, 'rehber')
+        self.assertEqual(category, 'guide')
     
-    def test_categorize_post_haber(self):
-        """Haber kategorisi testi"""
+    def test_categorize_post_news(self):
+        """News category test"""
         post = self.sample_posts[2]
         category = self.categorizer.categorize_post(post)
-        self.assertEqual(category, 'haber')
+        self.assertEqual(category, 'news')
     
-    def test_categorize_post_tartisma(self):
-        """Tartışma kategorisi testi"""
+    def test_categorize_post_discussion(self):
+        """Discussion category test"""
         post = self.sample_posts[3]
         category = self.categorizer.categorize_post(post)
-        self.assertEqual(category, 'tartisma')
+        self.assertEqual(category, 'discussion')
     
-    def test_categorize_post_medya(self):
-        """Medya kategorisi testi"""
+    def test_categorize_post_media(self):
+        """Media category test"""
         post = self.sample_posts[4]
         category = self.categorizer.categorize_post(post)
-        # Video içerdiği için medya kategorisine düşebilir
-        self.assertIn(category, ['medya', 'diger'])
+        # May fall into media category because it contains video
+        self.assertIn(category, ['media', 'other'])
     
-    def test_categorize_post_diger(self):
-        """Diğer kategorisi testi"""
+    def test_categorize_post_other(self):
+        """Other category test"""
         post = self.sample_posts[5]
         category = self.categorizer.categorize_post(post)
-        self.assertEqual(category, 'diger')
+        self.assertEqual(category, 'other')
     
     def test_categorize_posts(self):
-        """Toplu kategorizasyon testi"""
+        """Batch categorization test"""
         categorized = self.categorizer.categorize_posts(self.sample_posts)
         
-        # Tüm kategorilerin dictionary'de olduğunu kontrol et
+        # Check that all categories are in the dictionary
         for category in config.CATEGORY_RULES.keys():
             self.assertIn(category, categorized)
         
-        # Toplam post sayısının korunduğunu kontrol et
+        # Check that total post count is preserved
         total_categorized = sum(len(posts) for posts in categorized.values())
         self.assertEqual(total_categorized, len(self.sample_posts))
     
     def test_determine_content_type_video(self):
-        """Video içerik tipi testi"""
+        """Video content type test"""
         post = self.sample_posts[4]
         content_type = self.categorizer._determine_content_type(post)
         self.assertEqual(content_type, 'video')
     
     def test_determine_content_type_text(self):
-        """Text içerik tipi testi"""
+        """Text content type test"""
         post = self.sample_posts[0]
         content_type = self.categorizer._determine_content_type(post)
         self.assertEqual(content_type, 'text')
     
     def test_extract_tags(self):
-        """Etiket çıkarma testi"""
+        """Tag extraction test"""
         post = {
-            'content_text': 'Bu bir #test #python paylaşımıdır. Python güzel bir dildir.'
+            'content_text': 'This is a #test #python post. Python is a great language.'
         }
         tags = self.categorizer._extract_tags(post)
         
-        # En az bir etiket çıkarılmalı
+        # At least one tag should be extracted
         self.assertGreater(len(tags), 0)
         
-        # Hashtag'lerin çıkarıldığını kontrol et
+        # Check that hashtags are extracted
         self.assertIn('test', tags)
         self.assertIn('python', tags)
     
     def test_calculate_stats(self):
-        """İstatistik hesaplama testi"""
+        """Statistics calculation test"""
         self.categorizer.categorize_posts(self.sample_posts)
         stats = self.categorizer.get_stats()
         
-        # İstatistiklerin hesaplandığını kontrol et
+        # Check that statistics are calculated
         self.assertIn('total_posts', stats)
         self.assertEqual(stats['total_posts'], len(self.sample_posts))
         self.assertIn('category_distribution', stats)
@@ -171,21 +171,21 @@ class TestContentCategorizer(unittest.TestCase):
         self.assertIn('author_distribution', stats)
     
     def test_empty_posts_list(self):
-        """Boş post listesi testi"""
+        """Empty posts list test"""
         categorized = self.categorizer.categorize_posts([])
         
-        # Boş liste için tüm kategoriler boş olmalı
+        # All categories should be empty for empty list
         for posts in categorized.values():
             self.assertEqual(len(posts), 0)
     
     def test_custom_category_rules(self):
-        """Özel kategori kuralları testi"""
+        """Custom category rules test"""
         custom_rules = {
-            'teknoloji': {
-                'keywords': ['python', 'kod', 'program'],
+            'technology': {
+                'keywords': ['python', 'code', 'program'],
                 'priority': 1
             },
-            'diger': {
+            'other': {
                 'keywords': [],
                 'priority': 99
             }
@@ -195,19 +195,19 @@ class TestContentCategorizer(unittest.TestCase):
         
         post = {
             'post_id': '1',
-            'content_text': 'Python programlama dili',
-            'content_html': '<p>Python programlama dili</p>',
+            'content_text': 'Python programming language',
+            'content_html': '<p>Python programming language</p>',
             'images': [],
             'videos': [],
             'attachments': []
         }
         
         category = categorizer.categorize_post(post)
-        self.assertEqual(category, 'teknoloji')
+        self.assertEqual(category, 'technology')
 
 
 def run_tests():
-    """Testleri çalıştır"""
+    """Run tests"""
     unittest.main(argv=[''], exit=False, verbosity=2)
 
 
