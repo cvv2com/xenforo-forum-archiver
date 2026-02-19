@@ -55,8 +55,8 @@ class TestContentCategorizer(unittest.TestCase):
             {
                 'post_id': '4',
                 'author': 'Test User 4',
-                'content_text': 'Bu konu hakkında ne düşünüyorsunuz? Tartışalım.',
-                'content_html': '<p>Bu konu hakkında ne düşünüyorsunuz? Tartışalım.</p>',
+                'content_text': 'Bu konuda tartışma başlatmak istiyorum. Soru sormak ve yardım almak için.',
+                'content_html': '<p>Bu konuda tartışma başlatmak istiyorum. Soru sormak ve yardım almak için.</p>',
                 'images': [],
                 'videos': [],
                 'attachments': []
