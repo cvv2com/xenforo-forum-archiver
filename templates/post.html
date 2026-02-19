@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post {{ post.post_id }} - {{ thread_info.title }}</title>
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>{{ thread_info.title }}</h1>
+            <p>Post Detayı</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="../index.html">Ana Sayfa</a></li>
+                <li><a href="../{{ category }}.html">{{ category|capitalize }}</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="post-card">
+            <div class="post-header">
+                <div>
+                    <span class="post-author">{{ post.author }}</span>
+                    {% if post.author_id %}
+                    <small style="color: #666;">(ID: {{ post.author_id }})</small>
+                    {% endif %}
+                </div>
+                <span class="post-date">{{ post.date_text }}</span>
+                {% if post.content_type %}
+                <span class="tag">{{ post.content_type }}</span>
+                {% endif %}
+                <span class="tag" style="background: var(--primary-color); color: white;">
+                    {{ category }}
+                </span>
+            </div>
+            
+            <div class="post-content">
+                {{ post.content_html|safe }}
+            </div>
+            
+            {% if post.quotes %}
+            <div style="margin: 20px 0;">
+                <h3>Alıntılar</h3>
+                {% for quote in post.quotes %}
+                <blockquote style="background: var(--bg-color); padding: 15px; border-left: 4px solid var(--primary-color); margin: 10px 0;">
+                    <strong>{{ quote.author }}</strong>
+                    <p>{{ quote.content }}</p>
+                </blockquote>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% if post.images %}
+            <div class="post-media">
+                <h3>Görseller ({{ post.images|length }})</h3>
+                <div class="media-grid">
+                    {% for img in post.images %}
+                    <div class="media-item">
+                        {% if img.local_path %}
+                        <a href="../{{ img.local_path }}" target="_blank">
+                            <img src="../{{ img.local_path }}" alt="{{ img.alt }}" loading="lazy">
+                        </a>
+                        {% elif img.src %}
+                        <a href="{{ img.src }}" target="_blank">
+                            <img src="{{ img.src }}" alt="{{ img.alt }}" loading="lazy">
+                        </a>
+                        {% endif %}
+                        {% if img.title %}
+                        <p style="font-size: 0.85rem; margin-top: 5px;">{{ img.title }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if post.videos %}
+            <div class="post-media">
+                <h3>Videolar ({{ post.videos|length }})</h3>
+                {% for video in post.videos %}
+                    {% if video.type == 'youtube' %}
+                    {% set video_id = video.src|youtube_id %}
+                    {% if video_id %}
+                    <div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/{{ video_id }}" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                    {% if video.title %}
+                    <p style="margin-top: 10px;">{{ video.title }}</p>
+                    {% endif %}
+                    {% endif %}
+                    {% elif video.type == 'vimeo' %}
+                    {% set video_id = video.src|vimeo_id %}
+                    {% if video_id %}
+                    <div class="video-container">
+                        <iframe src="https://player.vimeo.com/video/{{ video_id }}" 
+                                frameborder="0" 
+                                allow="autoplay; fullscreen; picture-in-picture" 
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                    {% if video.title %}
+                    <p style="margin-top: 10px;">{{ video.title }}</p>
+                    {% endif %}
+                    {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% if post.attachments %}
+            <div class="post-media">
+                <h3>Ek Dosyalar ({{ post.attachments|length }})</h3>
+                <ul style="list-style: none;">
+                    {% for att in post.attachments %}
+                    <li style="padding: 10px; background: var(--bg-color); margin: 5px 0; border-radius: 5px;">
+                        {% if att.local_path %}
+                        <a href="../{{ att.local_path }}" download style="color: var(--primary-color); font-weight: bold;">
+                            📎 {{ att.title or att.filename }}
+                        </a>
+                        {% else %}
+                        <a href="{{ att.url }}" target="_blank" style="color: var(--primary-color); font-weight: bold;">
+                            📎 {{ att.title or att.filename }}
+                        </a>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            {% if post.tags %}
+            <div class="tags">
+                <strong>Etiketler:</strong>
+                {% for tag in post.tags %}
+                <span class="tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <p style="color: #666;">
+                    <strong>Post ID:</strong> {{ post.post_id }}<br>
+                    {% if post.date %}
+                    <strong>Tarih:</strong> {{ post.date }}<br>
+                    {% endif %}
+                    {% if post.category_score %}
+                    <strong>Kategori Skoru:</strong> {{ "%.2f"|format(post.category_score) }}
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px; text-align: center;">
+            <a href="../{{ category }}.html" style="display: inline-block; padding: 10px 20px; background: var(--primary-color); color: white; text-decoration: none; border-radius: 5px;">
+                ← {{ category|capitalize }} Kategorisine Dön
+            </a>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>XenForo Forum Archiver tarafından oluşturuldu</p>
+            <p><a href="../index.html" style="color: white;">Ana Sayfaya Dön</a></p>
+        </div>
+    </footer>
+</body>
+</html>
