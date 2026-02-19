@@ -1,7 +1,7 @@
 """
-XenForo Forum Archiver - Categorizer Modülü
+XenForo Forum Archiver - Categorizer Module
 
-Bu modül içerikleri otomatik olarak kategorize eder.
+This module automatically categorizes content.
 """
 
 import re
@@ -16,12 +16,12 @@ logger = setup_logger(__name__, config.LOG_FILE, config.LOG_LEVEL)
 
 
 class ContentCategorizer:
-    """İçerik kategorizasyon sınıfı"""
+    """Content categorization class"""
     
     def __init__(self, category_rules: Dict[str, Any] = None):
         """
         Args:
-            category_rules: Kategori kuralları dictionary
+            category_rules: Category rules dictionary
         """
         self.category_rules = category_rules or config.CATEGORY_RULES
         self.categorized_posts: Dict[str, List[Dict[str, Any]]] = {
@@ -31,81 +31,81 @@ class ContentCategorizer:
     
     def _determine_content_type(self, post: Dict[str, Any]) -> str:
         """
-        Post'un içerik tipini belirler.
+        Determines the content type of the post.
         
         Args:
-            post: Post verisi
+            post: Post data
         
         Returns:
-            İçerik tipi (text, image, video, attachment, code, link)
+            Content type (text, image, video, attachment, code, link)
         """
         images_count = len(post.get('images', []))
         videos_count = len(post.get('videos', []))
         attachments_count = len(post.get('attachments', []))
         content_text = post.get('content_text', '')
         
-        # Video içerik
+        # Video content
         if videos_count > 0:
             return 'video'
         
-        # Görsel ağırlıklı içerik
+        # Image-heavy content
         if images_count > 3:
             return 'image'
         
-        # Ek dosya içerik
+        # Attachment content
         if attachments_count > 0:
             return 'attachment'
         
-        # Kod içerik
+        # Code content
         if '<code>' in post.get('content_html', '') or '```' in content_text:
             return 'code'
         
-        # Link ağırlıklı içerik
+        # Link-heavy content
         link_pattern = r'http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+'
         links = re.findall(link_pattern, content_text)
         if len(links) > 2:
             return 'link'
         
-        # Varsayılan: text
+        # Default: text
         return 'text'
     
     def _extract_tags(self, post: Dict[str, Any]) -> List[str]:
         """
-        Post'tan etiketleri çıkarır.
+        Extracts tags from the post.
         
         Args:
-            post: Post verisi
+            post: Post data
         
         Returns:
-            Etiket listesi
+            List of tags
         """
         tags = []
         content_text = post.get('content_text', '')
         
-        # Hashtag'leri bul
+        # Find hashtags
         hashtags = re.findall(r'#(\w+)', content_text)
         tags.extend(hashtags)
         
-        # Büyük harfle başlayan kelimeleri bul (proper nouns)
+        # Find words starting with capital letter (proper nouns)
         words = content_text.split()
         proper_nouns = [word.strip('.,!?;:') for word in words if word and word[0].isupper() and len(word) > 3]
-        tags.extend(proper_nouns[:5])  # İlk 5 proper noun
+        tags.extend(proper_nouns[:5])  # First 5 proper nouns
         
-        # Tekrarları kaldır ve küçük harfe çevir
+        # Remove duplicates and convert to lowercase
         tags = list(set([tag.lower() for tag in tags]))
         
-        return tags[:10]  # Maksimum 10 etiket
+        return tags[:10]  # Maximum 10 tags
     
     def _calculate_category_score(self, post: Dict[str, Any], category: str) -> float:
         """
-        Post için kategori skorunu hesaplar.
+        Calculates the category score for the post.
         
         Args:
-            post: Post verisi
-            category: Kategori adı
+            post: Post data
+            category: Category name
         
         Returns:
-            Skor (0-1 arası)
+            Score (between 0-1)
         """
         if category not in self.category_rules:
             return 0.0
@@ -117,52 +117,52 @@ class ContentCategorizer:
         content_text = post.get('content_text', '').lower()
         title_text = post.get('title', '').lower()
         
-        # Keyword eşleşme sayısı
+        # Keyword match count
         matches = 0
         for keyword in keywords:
             keyword_lower = keyword.lower()
-            # Başlıkta eşleşme (2x ağırlık)
+            # Title match (2x weight)
             if keyword_lower in title_text:
                 matches += 2
-            # İçerikte eşleşme
+            # Content match
             if keyword_lower in content_text:
                 matches += 1
         
-        # Normalize et
-        max_possible_score = len(keywords) * 3  # Her keyword için max 3 puan
+        # Normalize
+        max_possible_score = len(keywords) * 3  # Max 3 points per keyword
         score = matches / max_possible_score if max_possible_score > 0 else 0.0
         
         return min(score, 1.0)
     
     def categorize_post(self, post: Dict[str, Any]) -> str:
         """
-        Tek bir post'u kategorize eder.
+        Categorizes a single post.
         
         Args:
-            post: Post verisi
+            post: Post data
         
         Returns:
-            Kategori adı
+            Category name
         """
-        # Her kategori için skor hesapla
+        # Calculate score for each category
         scores: Dict[str, float] = {}
         for category in self.category_rules.keys():
-            if category != 'diger':  # 'diger' kategorisini hesaplamadan atla
+            if category != 'other':  # Skip 'other' category from calculation
                 score = self._calculate_category_score(post, category)
                 scores[category] = score
         
-        # En yüksek skora sahip kategoriyi bul
+        # Find the category with the highest score
         if scores and max(scores.values()) > 0.1:  # Minimum threshold
             best_category = max(scores, key=scores.get)
         else:
-            best_category = 'diger'
+            best_category = 'other'
         
-        # Post'a kategori ve skor bilgisini ekle
+        # Add category and score information to post
         post['category'] = best_category
         post['category_score'] = scores.get(best_category, 0.0)
         post['content_type'] = self._determine_content_type(post)
         
-        # Etiketleri çıkar
+        # Extract tags
         if config.EXTRACT_TAGS:
             post['tags'] = self._extract_tags(post)
         
@@ -170,52 +170,52 @@ class ContentCategorizer:
     
     def categorize_posts(self, posts_data: List[Dict[str, Any]]) -> Dict[str, List[Dict[str, Any]]]:
         """
-        Tüm postları kategorize eder.
+        Categorizes all posts.
         
         Args:
-            posts_data: Post verisi listesi
+            posts_data: List of post data
         
         Returns:
-            Kategorize edilmiş postlar dictionary
+            Dictionary of categorized posts
         """
-        logger.info(f"Toplam {len(posts_data)} post kategorize ediliyor...")
+        logger.info(f"Categorizing total of {len(posts_data)} posts...")
         
-        # Her post'u kategorize et
+        # Categorize each post
         for post in posts_data:
             category = self.categorize_post(post)
             self.categorized_posts[category].append(post)
         
-        # İstatistikleri hesapla
+        # Calculate statistics
         self._calculate_stats(posts_data)
         
-        # İstatistikleri yazdır
+        # Print statistics
         self._print_stats()
         
         return self.categorized_posts
     
     def _calculate_stats(self, posts_data: List[Dict[str, Any]]) -> None:
         """
-        Kategorizasyon istatistiklerini hesaplar.
+        Calculates categorization statistics.
         
         Args:
-            posts_data: Post verisi listesi
+            posts_data: List of post data
         """
         total_posts = len(posts_data)
         
-        # Kategori dağılımı
+        # Category distribution
         category_distribution = {
             category: len(posts) for category, posts in self.categorized_posts.items()
         }
         
-        # İçerik tipi dağılımı
+        # Content type distribution
         content_types = [post.get('content_type', 'unknown') for post in posts_data]
         content_type_distribution = dict(Counter(content_types))
         
-        # Yazar dağılımı
+        # Author distribution
         authors = [post.get('author', 'Unknown') for post in posts_data]
         author_distribution = dict(Counter(authors).most_common(10))
         
-        # Görsel/video istatistikleri
+        # Image/video statistics
         total_images = sum(len(post.get('images', [])) for post in posts_data)
         total_videos = sum(len(post.get('videos', [])) for post in posts_data)
         total_attachments = sum(len(post.get('attachments', [])) for post in posts_data)
@@ -231,23 +231,23 @@ class ContentCategorizer:
         }
     
     def _print_stats(self) -> None:
-        """İstatistikleri konsola yazdırır."""
+        """Prints statistics to console."""
         logger.info("\n" + "="*50)
-        logger.info("KATEGORİZASYON İSTATİSTİKLERİ")
+        logger.info("CATEGORIZATION STATISTICS")
         logger.info("="*50)
         
-        logger.info(f"\nToplam Post: {self.stats['total_posts']}")
+        logger.info(f"\nTotal Posts: {self.stats['total_posts']}")
         
-        logger.info("\nKategori Dağılımı:")
+        logger.info("\nCategory Distribution:")
         for category, count in sorted(
             self.stats['category_distribution'].items(),
             key=lambda x: x[1],
             reverse=True
         ):
             percentage = (count / self.stats['total_posts'] * 100) if self.stats['total_posts'] > 0 else 0
-            logger.info(f"  {category.capitalize()}: {count} (%{percentage:.1f})")
+            logger.info(f"  {category.capitalize()}: {count} ({percentage:.1f}%)")
         
-        logger.info("\nİçerik Tipi Dağılımı:")
+        logger.info("\nContent Type Distribution:")
         for content_type, count in sorted(
             self.stats['content_type_distribution'].items(),
             key=lambda x: x[1],
@@ -255,22 +255,22 @@ class ContentCategorizer:
         ):
             logger.info(f"  {content_type.capitalize()}: {count}")
         
-        logger.info("\nEn Aktif Yazarlar (Top 10):")
+        logger.info("\nMost Active Authors (Top 10):")
         for author, count in list(self.stats['author_distribution'].items())[:10]:
-            logger.info(f"  {author}: {count} post")
+            logger.info(f"  {author}: {count} posts")
         
-        logger.info("\nMedya İstatistikleri:")
-        logger.info(f"  Toplam Görsel: {self.stats['total_images']}")
-        logger.info(f"  Toplam Video: {self.stats['total_videos']}")
-        logger.info(f"  Toplam Ek Dosya: {self.stats['total_attachments']}")
+        logger.info("\nMedia Statistics:")
+        logger.info(f"  Total Images: {self.stats['total_images']}")
+        logger.info(f"  Total Videos: {self.stats['total_videos']}")
+        logger.info(f"  Total Attachments: {self.stats['total_attachments']}")
         
         logger.info("="*50 + "\n")
     
     def get_stats(self) -> Dict[str, Any]:
         """
-        İstatistikleri döndürür.
+        Returns statistics.
         
         Returns:
-            İstatistik dictionary
+            Statistics dictionary
         """
         return self.stats

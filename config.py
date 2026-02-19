@@ -1,73 +1,73 @@
 """
-XenForo Forum Archiver - Yapılandırma Dosyası
+XenForo Forum Archiver - Configuration File
 
-Bu dosya projenin tüm yapılandırma ayarlarını içerir.
-.env dosyasından değerleri okur ve varsayılan değerler sağlar.
+This file contains all configuration settings for the project.
+It reads values from the .env file and provides default values.
 """
 
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# .env dosyasını yükle
+# Load .env file
 load_dotenv()
 
-# Proje kök dizini
+# Project root directory
 BASE_DIR = Path(__file__).resolve().parent
 
-# Forum Yapılandırması
+# Forum Configuration
 FORUM_URL = os.getenv('FORUM_URL', 'https://forum.example.com')
 FORUM_USERNAME = os.getenv('FORUM_USERNAME', '')
 FORUM_PASSWORD = os.getenv('FORUM_PASSWORD', '')
 THREAD_URL = os.getenv('THREAD_URL', '')
 
-# Scraping Ayarları
+# Scraping Settings
 SCRAPE_DELAY = float(os.getenv('SCRAPE_DELAY', '2.5'))
-MAX_PAGES = int(os.getenv('MAX_PAGES', '0'))  # 0 = tüm sayfalar
+MAX_PAGES = int(os.getenv('MAX_PAGES', '0'))  # 0 = all pages
 HEADLESS_MODE = os.getenv('HEADLESS_MODE', 'false').lower() == 'true'
 
-# Çıktı Ayarları
+# Output Settings
 OUTPUT_DIR = Path(os.getenv('OUTPUT_DIR', 'website_output'))
 DOWNLOAD_MEDIA = os.getenv('DOWNLOAD_MEDIA', 'true').lower() == 'true'
 MEDIA_DIR = Path(os.getenv('MEDIA_DIR', 'downloaded_media'))
 
-# Kategorizasyon Ayarları
+# Categorization Settings
 AUTO_CATEGORIZE = os.getenv('AUTO_CATEGORIZE', 'true').lower() == 'true'
 EXTRACT_TAGS = os.getenv('EXTRACT_TAGS', 'true').lower() == 'true'
 
-# ChromeDriver Ayarları
+# ChromeDriver Settings
 CHROMEDRIVER_PATH = os.getenv('CHROMEDRIVER_PATH', '')
 CHROME_BINARY_PATH = os.getenv('CHROME_BINARY_PATH', '')
 
-# Çerez Dosyası
+# Cookie File
 COOKIES_FILE = BASE_DIR / 'forum_cookies.pkl'
 
 # User Agent
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
 
-# Kategori Kuralları
+# Category Rules
 CATEGORY_RULES = {
-    'inceleme': {
-        'keywords': ['inceleme', 'review', 'test', 'deneme', 'analiz', 'değerlendirme'],
+    'review': {
+        'keywords': ['review', 'test', 'analysis', 'evaluation', 'assessment', 'benchmark'],
         'priority': 1
     },
-    'rehber': {
-        'keywords': ['rehber', 'guide', 'nasıl', 'tutorial', 'anlatım', 'adım adım', 'kurulum'],
+    'guide': {
+        'keywords': ['guide', 'how', 'tutorial', 'instruction', 'step by step', 'setup', 'install'],
         'priority': 2
     },
-    'haber': {
-        'keywords': ['haber', 'news', 'duyuru', 'announcement', 'yeni', 'güncelleme'],
+    'news': {
+        'keywords': ['news', 'announcement', 'new', 'update', 'release'],
         'priority': 3
     },
-    'tartisma': {
-        'keywords': ['tartışma', 'discussion', 'soru', 'question', 'yardım', 'help'],
+    'discussion': {
+        'keywords': ['discussion', 'question', 'help', 'support', 'issue'],
         'priority': 4
     },
-    'medya': {
-        'keywords': ['video', 'resim', 'image', 'galeri', 'gallery', 'foto'],
+    'media': {
+        'keywords': ['video', 'image', 'picture', 'gallery', 'photo', 'screenshot'],
         'priority': 5
     },
-    'diger': {
+    'other': {
         'keywords': [],
         'priority': 99
     }
