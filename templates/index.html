@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ thread_info.title }} - Forum Arşivi</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>{{ thread_info.title }}</h1>
+            <p>Forum Arşivi - XenForo Forum Archiver</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Ana Sayfa</a></li>
+                {% for category in categories %}
+                <li><a href="{{ category.name }}.html">{{ category.name|capitalize }} ({{ category.count }})</a></li>
+                {% endfor %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>İstatistikler</h2>
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>{{ stats.total_posts }}</h3>
+                <p>Toplam Post</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ stats.total_images }}</h3>
+                <p>Toplam Görsel</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ stats.total_videos }}</h3>
+                <p>Toplam Video</p>
+            </div>
+            <div class="stat-card">
+                <h3>{{ stats.total_attachments }}</h3>
+                <p>Ek Dosya</p>
+            </div>
+        </div>
+
+        <h2>Kategoriler</h2>
+        <div class="category-grid">
+            {% for category in categories %}
+            <div class="category-card">
+                <div class="category-header">
+                    <h2>{{ category.name|capitalize }}</h2>
+                    <p>{{ category.count }} post</p>
+                </div>
+                <div class="category-content">
+                    <p>Son paylaşımlar:</p>
+                    <ul>
+                        {% for post in category.posts %}
+                        <li>
+                            <a href="posts/post_{{ post.post_id }}.html">
+                                {{ post.content_text|truncate_text(80) }}
+                            </a>
+                            <small>- {{ post.author }}</small>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <a href="{{ category.name }}.html" style="color: var(--primary-color); font-weight: bold;">
+                        Tümünü Gör →
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        <h2>En Aktif Yazarlar</h2>
+        <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: var(--shadow);">
+            <ul style="list-style: none;">
+                {% for author, count in stats.author_distribution.items() %}
+                <li style="padding: 10px; border-bottom: 1px solid var(--border-color);">
+                    <strong>{{ author }}</strong>: {{ count }} post
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>XenForo Forum Archiver tarafından oluşturuldu</p>
+            <p>Oluşturma Tarihi: {{ generation_date }}</p>
+            <p><a href="{{ thread_info.url }}" target="_blank" style="color: white;">Orijinal Thread</a></p>
+        </div>
+    </footer>
+</body>
+</html>

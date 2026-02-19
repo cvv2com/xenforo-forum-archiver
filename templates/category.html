@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ category|capitalize }} - {{ thread_info.title }}</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <div class="container">
+            <h1>{{ category|capitalize }}</h1>
+            <p>{{ thread_info.title }}</p>
+        </div>
+    </header>
+
+    <nav>
+        <div class="container">
+            <ul>
+                <li><a href="index.html">Ana Sayfa</a></li>
+                {% for cat_name in ['inceleme', 'rehber', 'haber', 'tartisma', 'medya', 'diger'] %}
+                <li>
+                    <a href="{{ cat_name }}.html" {% if cat_name == category %}style="background: var(--primary-color); color: white;"{% endif %}>
+                        {{ cat_name|capitalize }}
+                    </a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h2>Toplam {{ posts|length }} Post</h2>
+        
+        {% for post in posts %}
+        <div class="post-card">
+            <div class="post-header">
+                <span class="post-author">{{ post.author }}</span>
+                <span class="post-date">{{ post.date_text }}</span>
+                {% if post.content_type %}
+                <span class="tag">{{ post.content_type }}</span>
+                {% endif %}
+            </div>
+            
+            <div class="post-content">
+                {{ post.content_html|safe }}
+            </div>
+            
+            {% if post.images %}
+            <div class="post-media">
+                <h4>Görseller ({{ post.images|length }})</h4>
+                <div class="media-grid">
+                    {% for img in post.images %}
+                    <div class="media-item">
+                        {% if img.local_path %}
+                        <img src="{{ img.local_path }}" alt="{{ img.alt }}" loading="lazy">
+                        {% elif img.src %}
+                        <img src="{{ img.src }}" alt="{{ img.alt }}" loading="lazy">
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if post.videos %}
+            <div class="post-media">
+                <h4>Videolar ({{ post.videos|length }})</h4>
+                {% for video in post.videos %}
+                    {% if video.type == 'youtube' %}
+                    {% set video_id = video.src|youtube_id %}
+                    {% if video_id %}
+                    <div class="video-container">
+                        <iframe src="https://www.youtube.com/embed/{{ video_id }}" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                    {% endif %}
+                    {% elif video.type == 'vimeo' %}
+                    {% set video_id = video.src|vimeo_id %}
+                    {% if video_id %}
+                    <div class="video-container">
+                        <iframe src="https://player.vimeo.com/video/{{ video_id }}" 
+                                frameborder="0" 
+                                allow="autoplay; fullscreen; picture-in-picture" 
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                    {% endif %}
+                    {% endif %}
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            {% if post.attachments %}
+            <div class="post-media">
+                <h4>Ek Dosyalar ({{ post.attachments|length }})</h4>
+                <ul>
+                    {% for att in post.attachments %}
+                    <li>
+                        {% if att.local_path %}
+                        <a href="{{ att.local_path }}" download>{{ att.title or att.filename }}</a>
+                        {% else %}
+                        <a href="{{ att.url }}" target="_blank">{{ att.title or att.filename }}</a>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            {% if post.tags %}
+            <div class="tags">
+                {% for tag in post.tags %}
+                <span class="tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div style="margin-top: 10px;">
+                <a href="posts/post_{{ post.post_id }}.html" style="color: var(--primary-color);">
+                    Detaylı Görünüm →
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <footer>
+        <div class="container">
+            <p>XenForo Forum Archiver tarafından oluşturuldu</p>
+            <p><a href="index.html" style="color: white;">Ana Sayfaya Dön</a></p>
+        </div>
+    </footer>
+</body>
+</html>
